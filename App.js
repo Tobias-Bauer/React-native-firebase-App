@@ -5,52 +5,29 @@ import {
   View,
   Button,
   Alert,
-  TouchableOpacity 
+  TouchableOpacity,
+  TextInput,
+  Switch,
+  Image
 } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
+import { createStackNavigator } from 'react-navigation';
+import LoginScreen from './screens/LoginScreen';
+import HomeScreen from './screens/HomeScreen';
+import SocialMediaScreen from './screens/SocialMediaScreen';
 
-EStyleSheet.build({
-  $textColor: 'white'
+
+
+const Navigation = createStackNavigator({
+  First: {
+    screen: LoginScreen
+  },
+  Second: {
+    screen: HomeScreen
+  },
+  SocialMedia: {
+    screen: SocialMediaScreen
+  },
 });
 
-export default class App extends React.Component {
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.loginText}>Thats the first line of text!</Text>
-        <TouchableOpacity
-          style={styles.loginScreenButton}
-          onPress={() => navigate('HomeScreen')}
-          underlayColor='#fff'>
-          <Text style={styles.loginButtonText}>Login</Text>
-          </TouchableOpacity>
-      </View>
-    );
-  }
-}
-const styles = EStyleSheet.create({
-  container: {
-    width: '100%',
-    height: '100%',
-  },
-  loginScreenButton:{
-    right: '20%',
-    left: '80% - 70',
-    top: '80% - 40',
-    bottom: '20%' ,
-    backgroundColor:'blue',
-    borderRadius:10,
-    position: 'absolute',
-    justifyContent:'center'
-  },
-  loginButtonText:{
-      color:'$textColor',
-      textAlign:'center'
-  },
-  loginText:{
-    right: '50% - 80',
-    left: '50% - 80',
-    top: '20%',
-    bottom: '80% - 30 '
-  }
-});
+export default Navigation;
