@@ -10,6 +10,7 @@ import {
   Switch,
   Image
 } from 'react-native';
+import Info from './SocialMediaScreen';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { createStackNavigator } from 'react-navigation';
 const util = require('util');

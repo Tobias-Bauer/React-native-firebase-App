@@ -21,18 +21,44 @@ EStyleSheet.build({
 
 
 export default class HomeScreen extends React.Component {
+    constructor(props){
+        super(props);
+        this.state = {userInfo: null,};
+    }
     static navigationOptions = {
-        title: "Socialmedia",
+        title: "Socialmedia", 
     };
+    
+    //Facebook login
     async loginWithFacebook() {
-        const { type, token } = await Expo.Facebook.logInWithReadPermissionsAsync('262997934355158', { permissions: ['email', 'public_profile'] })
-        if (type == 'success') {
-          const credential = firebase.auth.FacebookAuthProvider.credential(token)
-          firebase.auth().signInAndRetrieveDataWithCredential(credential).catch((error) => {
-            console.log(error)
-          })
-        }
-      }
+  try {
+    const {
+      type,
+      token,
+      expires,
+      permissions,
+      declinedPermissions,
+    } = await Expo.Facebook.logInWithReadPermissionsAsync('262997934355158', {
+      permissions: ['public_profile'],
+    });
+    if (type === 'success') {
+      const credential = firebase.auth.FacebookAuthProvider.credential(token)
+      this.props.navigation.navigate('Second', {});
+      firebase.auth().signInAndRetrieveDataWithCredential(credential).catch((error) => {
+        console.log(error)
+      })
+      // Get the user's name using Facebook's Graph API
+      const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,name,picture,type(large)`);
+      const userInfo = await response.json();
+      this.setState({userInfo});
+    } else {
+      // type === 'cancel'
+    }
+  } catch ({ message }) {
+    alert(`Facebook Login Error: ${message}`);
+  }
+}
+//Google login
       async loginWithGoogle() {
         const { type, token } = await await Expo.Google.logInAsync({
             //androidClientId: YOUR_CLIENT_ID_HERE,
@@ -50,7 +76,7 @@ export default class HomeScreen extends React.Component {
     render() {
         return(
         <View style={styles.container}>
-            <View style={styles.container}><TouchableOpacity style={[styles.buttons, {backgroundColor: '#3b5998'}]} onPress={() => this.loginWithFacebook()}>
+            <View style={styles.container}><TouchableOpacity style={[styles.buttons, {backgroundColor: '#3b5998'}]} onPress={this.loginWithFacebook.bind(this)}>
             <Image style={styles.img} source={require("../assets/Facebook.png")}/><Text style={{left: 20, color: 'white'}}>Facebook</Text>
             </TouchableOpacity></View>
             <View style={styles.container}><TouchableOpacity style={styles.buttons} onPress={() => this.loginWithGoogle()}>
