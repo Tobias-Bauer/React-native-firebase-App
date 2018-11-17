@@ -45,7 +45,7 @@ export default class loginScreen extends React.Component {
     password: '',
     error: '',
     loading: false,
-    authenticating: false,
+    authenticated: false,
     isActive: true
   }
   componentWillMount(){
@@ -54,6 +54,17 @@ export default class loginScreen extends React.Component {
         console.log(user)
       }
     })
+  }
+  componentDidMount() {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        this.setState({ loading: false, authenticated: true });
+        Alert.alert("no HI")
+      } else {
+        this.setState({ loading: false, authenticated: false });
+        Alert.alert("HI")
+      }
+    });
   }
   onPressLogin(){
     this.setState({error: '', loading: true});
@@ -92,7 +103,9 @@ export default class loginScreen extends React.Component {
           <ActivityIndicator size='large'/>
         </View>
       )
-    }
+    }else if (this.state.authenticated) {
+      this.props.navigation.navigate('Second', {});
+    }else{
     return (
       <ImageBackground blurRadius={5} source={require("../assets/background_1.jpg")} style={styles.container}>
       <View style={styles.loginTextView}><Text style={styles.loginText} >Thats the first line of text!</Text></View>
@@ -126,6 +139,7 @@ export default class loginScreen extends React.Component {
         </ImageBackground>
     )
   }
+}
 
   render() {
       var {navigate} = this.props.navigation;

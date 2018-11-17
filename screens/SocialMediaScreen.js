@@ -11,6 +11,7 @@ import {
   Image
 } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
+import { LoginManager,LoginButton,AccessToken,GraphRequest,GraphRequestManager} from 'react-native-fbsdk';
 import { createStackNavigator } from 'react-navigation';
 import * as firebase from 'firebase';
 
@@ -28,7 +29,9 @@ export default class HomeScreen extends React.Component {
     static navigationOptions = {
         title: "Socialmedia", 
     };
-    
+    renderImage(){
+          console.log(this.state.userInfo);
+    }
     //Facebook login
     async loginWithFacebook() {
   try {
@@ -43,14 +46,15 @@ export default class HomeScreen extends React.Component {
     });
     if (type === 'success') {
       const credential = firebase.auth.FacebookAuthProvider.credential(token)
-      this.props.navigation.navigate('Second', {});
       firebase.auth().signInAndRetrieveDataWithCredential(credential).catch((error) => {
         console.log(error)
       })
       // Get the user's name using Facebook's Graph API
-      const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,name,picture,type(large)`);
+      const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,name,picture.type(large)`);
       const userInfo = await response.json();
       this.setState({userInfo});
+      this.renderImage();
+      this.props.navigation.navigate('Second', {url: this.state.userInfo.picture.data.url});
     } else {
       // type === 'cancel'
     }
