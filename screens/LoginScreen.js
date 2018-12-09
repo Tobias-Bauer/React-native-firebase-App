@@ -11,21 +11,13 @@ import {
   Image,
   SafeAreaView,
   ActivityIndicator,
-  ImageBackground
+  ImageBackground,
+  StatusBar
 } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { StackNavigator } from 'react-navigation';
-import * as firebase from 'firebase';
-const util = require('util');
-
-firebase.initializeApp({
-  apiKey: "AIzaSyC1AsSlqbtMAFXEOjQamz-35ywlqRW-Vuc",
-  authDomain: "react-native-firebase-3.firebaseapp.com",
-  databaseURL: "https://react-native-firebase-3.firebaseio.com",
-  projectId: "react-native-firebase-3",
-  storageBucket: "react-native-firebase-3.appspot.com",
-  messagingSenderId: "258088831368"
-});
+import firebase from '@firebase/app'
+import '@firebase/auth'
 
 EStyleSheet.build({
   $textColor: 'white'
@@ -40,61 +32,83 @@ export default class loginScreen extends React.Component {
       title: '',
       header: null,
   };
+  
   state = {
     email: '',
     password: '',
     error: '',
     loading: false,
     authenticated: false,
-    isActive: true
+    isActive: true,
+    hidePassword: false,
+    userInfo: null,
   }
   componentWillMount(){
+ 
+        //Tests if user is signed in
     firebase.auth().onAuthStateChanged((user) => {
-      if(user != null){
-        console.log(user)
-      }
-    })
-  }
-  componentDidMount() {
-    firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        this.setState({ loading: false, authenticated: true });
-        Alert.alert("no HI")
-      } else {
-        this.setState({ loading: false, authenticated: false });
-        Alert.alert("HI")
+      if (firebase.auth().currentUser != null) {
+        this.props.navigation.navigate('Home', {});
+      }else{
+        this.props.navigation.navigate('Login', {});
       }
     });
+    
   }
   onPressLogin(){
     this.setState({error: '', loading: true});
     const{email, password} = this.state;
     firebase.auth().signInWithEmailAndPassword(email, password)
     .then(() => {
-      this.props.navigation.navigate('Second', {});
-      this.setState({error:'', loading: false});
-    })
-    .catch(() => {
-      this.setState({error: 'Authentication failed', loading: false});
-    })
-  }
-  onPressSignUp(){
-    this.setState({error: '', loading: true});
-    const{email, password} = this.state;
-    firebase.auth().createUserWithEmailAndPassword(email, password)
-    .then(() => {
-      this.props.navigation.navigate('Second', {});
+      this.props.navigation.navigate('Home', {});
       this.setState({error:'', loading: false});
     })
     .catch(function(error) {
       //this.setState({error: 'Authentication failed', loading: false});
-      var errorCode = error.code;
-      switch(error.code) {
-        case 'auth/email-already-in-use':
-          Alert.alert("Email already in use");
-           break;
-      }
+      alert(`Login ${error}`);
+      
     })
+  }
+  //Send info th Firebase
+  writeUserDataFacebook(){
+    var profileMail = this.state.userInfo.email.toLowerCase()
+    /*var user1 = firebase.auth().currentUser;
+    if (firebase.auth().currentUser == null){
+      Alert.alert("Not Logged in please try again.")
+    }
+    user1.providerData.forEach(function(profile){
+      profileMail = profile.email;
+    })*/
+    
+    firebase.firestore().collection('user').doc(profileMail).set(this.state.userInfo)
+    }
+    //Login with facebook
+  async loginWithFacebook() {
+    try {
+      const {
+        type,
+        token,
+        expires,
+        permissions,
+        declinedPermissions,
+      } = await Expo.Facebook.logInWithReadPermissionsAsync('262997934355158', {
+        permissions: ['public_profile'],
+      });
+      if (type === 'success') {
+        const credential = firebase.auth.FacebookAuthProvider.credential(token)
+        firebase.auth().signInAndRetrieveDataWithCredential(credential).catch((error) => {
+          console.log(error)
+        });
+        const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,email,name,picture.type(large)`);
+        const userInfo = await response.json();
+        this.setState({userInfo});
+      } else {
+        // type === 'cancel'
+      }
+    } catch ({ message }) {
+      alert(`Facebook Login Error: ${message}`);
+    }
+    this.writeUserDataFacebook();
   }
   renderCurrentState() {
     if (this.state.authenticating){
@@ -103,11 +117,10 @@ export default class loginScreen extends React.Component {
           <ActivityIndicator size='large'/>
         </View>
       )
-    }else if (this.state.authenticated) {
-      this.props.navigation.navigate('Second', {});
     }else{
     return (
-      <ImageBackground blurRadius={5} source={require("../assets/background_1.jpg")} style={styles.container}>
+      <ImageBackground blurRadius={20} source={require("../assets/background_1.jpg")} style={styles.container}>
+        <StatusBar barStyle="light-content"/>
       <View style={styles.loginTextView}><Text style={styles.loginText} >Thats the first line of text!</Text></View>
       <View style={{flex: 3.5, width: '100%', alignItems: 'center'}}>
         <View style={styles.loginView}>
@@ -115,34 +128,52 @@ export default class loginScreen extends React.Component {
         <Text style={styles.loginViewText}>LOGIN</Text>
         <View style={{top: '35%',}} >
           <TextInput style={styles.emailfield} underlineColorAndroid="transparent" placeholder="E-mail" onChangeText={email => this.setState({ email })} value={this.state.email}/>
-          <TextInput style={styles.passwordfield} underlineColorAndroid="transparent" secureTextEntry={true} placeholder="Passwort" onChangeText={password => this.setState({ password })} value={this.state.password}/>
+          <TextInput style={styles.passwordfield} underlineColorAndroid="transparent" secureTextEntry={!this.state.hidePassword} placeholder="Passwort" onChangeText={password => this.setState({ password })} value={this.state.password}/>
         </View>
-        <View style={styles.rememberView} >
-          <Switch style={styles.switch} value={this.state.isActive} onValueChange={(val) => this.setState({isActive: val})}/>
-          <Text style={styles.rememberMe}>Remember me</Text>
+        <View style={styles.showPasswordView} >
+          <Switch style={styles.switch} value={this.state.hidePassword} onValueChange={() => this.setState({hidePassword: !this.state.hidePassword})}/>
+          <Text style={styles.showPassword}>Show password</Text>
         </View>
         </View>
         <View style={styles.ButtonView} pointerEvents='box-none'>
           <TouchableOpacity
             style={styles.loginScreenButton}
-            //onPress={() => navigate('Second', {})}
+            //onPress={() => navigate('Home', {})}
             onPress={() => this.onPressLogin()}>
             <Image style={{width: 80, height: 80, }} source={require("../assets/LoginButton.png")}/>
           </TouchableOpacity>
        </View>
       </View>
-        <View style={styles.container2}><View style={[styles.otherButtons, {backgroundColor: 'black'}]}>
-        <TouchableOpacity onPress={() => this.props.navigation.navigate('SocialMedia', {})} style={{width: '100%', height: '100%', alignItems: 'center',justifyContent: 'center',}}><Text style={{color: 'white',}}>Login with socialmedia</Text></TouchableOpacity></View></View>
         <View style={[styles.container2, {justifyContent: 'flex-start'}]}><ImageBackground onPress={() => this.onPressSignUp()} imageStyle={{ borderRadius: 25 }} source={require("../assets/Gradient_1.png")} style={styles.otherButtons}>
-        <TouchableOpacity onPress={() => this.onPressSignUp()} style={{width: '100%', height: '100%', alignItems: 'center',justifyContent: 'center',}}><Text style={{color: 'white',}}>Sign in</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => this.props.navigation.navigate('SignUp', {})} style={{width: '100%', height: '100%', alignItems: 'center',justifyContent: 'center',}}><Text style={{color: 'white',}}>Sign up</Text></TouchableOpacity>
         </ImageBackground></View>
+
+        <View style={{flex: 0.25}}/>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <View style = {styles.lineStyle}/>
+          <View style={{flex: 0.1}}/>
+          <Text style={{color: 'white'}}>Or use</Text>
+          <View style={{flex: 0.1}}/>
+          <View style = {styles.lineStyle}/>
+        </View>
+        <View style={{flex: 0.25}}/>
+
+        <View style={[styles.container2, {flexDirection: "row"}]}>
+          <View style={styles.signUpButtons}>
+          <TouchableOpacity onPress={this.loginWithFacebook.bind(this)} style={{width: '100%', height: '100%', alignItems: 'center',justifyContent: 'center',}}><Image style={{width:45, height:45,}} source={require("../assets/Facebook.png")}/></TouchableOpacity></View>
+          <View style={{width: '15%'}}/>
+          <Text style={{color: 'white'}}>or</Text>
+          <View style={{width: '15%'}}/>
+          <View style={styles.signUpButtons}>
+          <TouchableOpacity onPress={() => this.props.navigation.navigate('SocialMedia', {})} style={{width: '100%', height: '100%', alignItems: 'center',justifyContent: 'center',}}><Image style={{width:45, height:45,}} source={require("../assets/Google.png")}/></TouchableOpacity></View>
+        </View>
+        <View style={{flex: 0.25}}/>
         </ImageBackground>
     )
   }
 }
 
   render() {
-      var {navigate} = this.props.navigation;
     return (
       <View>
         {this.renderCurrentState()}
@@ -213,7 +244,7 @@ const styles = EStyleSheet.create({
     position: 'absolute',
     fontWeight: 'bold',
   },
-  rememberMe:{
+  showPassword:{
     position: 'absolute',
     left: '20%',
   },
@@ -221,7 +252,7 @@ const styles = EStyleSheet.create({
     left: '-5%',
     position: 'absolute',
   },
-  rememberView:{
+  showPasswordView:{
     width: '85%',
     height: 50,
     position: 'absolute',
@@ -240,13 +271,30 @@ const styles = EStyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  signUpButtons:{
+    width: 80,
+    height: 80,
+    borderRadius: 50,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 15 },
+    shadowOpacity: 0.1,
+    shadowRadius: 18,
+    elevation: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'white'
+  },
   loginTextView:{
     flex: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  lineStyle:{
+    borderWidth: 0.5,
+    borderColor:'white',
+    width: '30%',
+  },
   container2:{
-    flex: 1,
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',

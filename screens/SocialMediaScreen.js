@@ -8,13 +8,14 @@ import {
   TouchableOpacity,
   TextInput,
   Switch,
-  Image
+  Image,
+  AsyncStorage
 } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { LoginManager,LoginButton,AccessToken,GraphRequest,GraphRequestManager} from 'react-native-fbsdk';
-import { createStackNavigator } from 'react-navigation';
-import * as firebase from 'firebase';
-
+const firebase = require("firebase");
+// Required for side-effects
+require("firebase/firestore");
 
 EStyleSheet.build({
     $textColor: 'white'
@@ -29,9 +30,16 @@ export default class HomeScreen extends React.Component {
     static navigationOptions = {
         title: "Socialmedia", 
     };
-    renderImage(){
-          console.log(this.state.userInfo);
+    writeUserDataFacebook(){
+      var profileMail;
+      var user1 = firebase.auth().currentUser;
+      if (user1 != null) {
+      user1.providerData.forEach(function (profile) {
+        profileMail = profile.email;
+      });
     }
+      firebase.firestore().collection('user').doc(profileMail).set(this.state.userInfo)
+      }
     //Facebook login
     async loginWithFacebook() {
   try {
@@ -41,26 +49,23 @@ export default class HomeScreen extends React.Component {
       expires,
       permissions,
       declinedPermissions,
-    } = await Expo.Facebook.logInWithReadPermissionsAsync('262997934355158', {
-      permissions: ['public_profile'],
-    });
+    } = await Expo.Facebook.logInWithReadPermissionsAsync('262997934355158', {permissions: ['public_profile'],});
     if (type === 'success') {
       const credential = firebase.auth.FacebookAuthProvider.credential(token)
       firebase.auth().signInAndRetrieveDataWithCredential(credential).catch((error) => {
         console.log(error)
       })
       // Get the user's name using Facebook's Graph API
-      const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,name,picture.type(large)`);
+      const response = await fetch(`https://graph.facebook.com/me?access_token=${token}&fields=id,email,name,picture.type(large)`);
       const userInfo = await response.json();
       this.setState({userInfo});
-      this.renderImage();
-      this.props.navigation.navigate('Second', {url: this.state.userInfo.picture.data.url});
     } else {
       // type === 'cancel'
     }
   } catch ({ message }) {
     alert(`Facebook Login Error: ${message}`);
   }
+  this.writeUserDataFacebook()
 }
 //Google login
       async loginWithGoogle() {

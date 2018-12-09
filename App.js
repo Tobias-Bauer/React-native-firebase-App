@@ -15,19 +15,24 @@ import { createStackNavigator } from 'react-navigation';
 import LoginScreen from './screens/LoginScreen';
 import HomeScreen from './screens/HomeScreen';
 import SocialMediaScreen from './screens/SocialMediaScreen';
+import SignUpScreen from './screens/SignUpScreen';
+import firebase from './Firebase.js'
 
-
-
-const Navigation = createStackNavigator({
-  First: {
+const Navigation = createStackNavigator(
+  {
+  Login: {
     screen: LoginScreen
   },
-  Second: {
+  SignUp: {
+    screen: SignUpScreen
+  },
+  Home: {
     screen: HomeScreen
   },
   SocialMedia: {
     screen: SocialMediaScreen
   },
-});
+}
+);
 
 export default Navigation;
