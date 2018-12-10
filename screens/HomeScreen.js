@@ -59,17 +59,17 @@ export default class HomeScreen extends React.Component {
             )
         }
     }
-    //Noch nicht funktionsfähig
     checkVerifycation(){
-        firebase.auth().currentUser.reload()
+        firebase.auth().currentUser.reload().then(() =>{
         if(!firebase.auth().currentUser.emailVerified){
             Alert.alert("Your Verifycation is not completed")
         }else{
-            this.render()
+            Alert.alert("Your Verifycation is completed")
+            this.forceUpdate()
         }
+        })
     }
-
-    render() {
+    renderState(){
         if (!firebase.auth().currentUser.emailVerified){
             firebase.auth().currentUser.sendEmailVerification()
             return(
@@ -84,15 +84,22 @@ export default class HomeScreen extends React.Component {
             );
         }else{
             //Home screen
-            const url = this.state.pictureUrl;
             return(
             <View>
-                <Text>Second View: {url}</Text>
+                <Text>Second View: {this.state.pictureUrl}</Text>
                 {this.showImage()}
                 <Button onPress={() => this.signOut()} title="Sign Out"/>
             </View>
             );
         }
+    }
+    
+    render(){
+        return(
+            <View style={{width: '100%', height: '100%'}}>
+                {this.renderState()}
+            </View>
+        );
     }
 }
 
