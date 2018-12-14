@@ -19,15 +19,19 @@ import '@firebase/auth'
 export default class HomeScreen extends React.Component {
     constructor(props){
         super(props);
-        this.state = {hidePassword: false,email: "", password: '', password1: ''};
+        this.state = {hidePassword: false,email: "", password: '', password1: '', name:''};
     };
     static navigationOptions = {
         header: null,
     };
     writeUserData(){
+        if(this.state.name == null){
+            Alert.alert("Please enter a username")
+        }else{
         Usermail = this.state.email.toLowerCase();
         firebase.firestore().collection('user').doc(Usermail).set({
             email: Usermail,
+            name: this.state.name,
             picture:{
                 data:{
                     url: "https://images.unsplash.com/photo-1523325343676-4136d25d013b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=900&q=60"
@@ -35,6 +39,7 @@ export default class HomeScreen extends React.Component {
             }
         })
         }
+    }
     onPressSignUp(){
         if(this.state.password != this.state.password1){
             Alert.alert("The passwords aren't the same! ;(");
@@ -61,7 +66,13 @@ export default class HomeScreen extends React.Component {
                         <View style={{flex: 0.5}}/>
                         <View style={{flex: 0.7, flexDirection: "row"}}>
                             <View style={styles.spacing2}/>
-                            <TextInput style={styles.field} placeholder="email" onChangeText={mail => this.setState({ email:mail })}></TextInput>
+                            <TextInput style={styles.field} placeholder="name" onChangeText={name => this.setState({name})}></TextInput>
+                            <View style={styles.spacing2}/>
+                        </View>
+                        <View style={styles.spacing}/>
+                        <View style={{flex: 0.7, flexDirection: "row"}}>
+                            <View style={styles.spacing2}/>
+                            <TextInput style={styles.field} placeholder="email" onChangeText={email => this.setState({email})}></TextInput>
                             <View style={styles.spacing2}/>
                         </View>
                         <View style={styles.spacing}/>
