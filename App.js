@@ -17,6 +17,7 @@ import HomeScreen from './screens/HomeScreen';
 import SocialMediaScreen from './screens/SocialMediaScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import ProfileScreen from './screens/Profile';
+import ArticleScreen from './screens/CreateArticle';
 import firebase from './Firebase.js'
 
 const Navigation = createStackNavigator(
@@ -35,6 +36,9 @@ const Navigation = createStackNavigator(
   },
   Profile: {
     screen: ProfileScreen
+  },
+  Article: {
+    screen: ArticleScreen
   },
 }
 );
