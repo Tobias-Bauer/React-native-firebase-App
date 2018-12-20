@@ -12,7 +12,6 @@ import {
   AsyncStorage
 } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
-import { LoginManager,LoginButton,AccessToken,GraphRequest,GraphRequestManager} from 'react-native-fbsdk';
 const firebase = require("firebase");
 // Required for side-effects
 require("firebase/firestore");

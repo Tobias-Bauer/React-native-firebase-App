@@ -91,6 +91,7 @@ export default class HomeScreen extends React.Component {
                 <Button onPress={() => this.signOut()} title="Sign Out"/>
                 <Button onPress={() => this.props.navigation.navigate('Profile', {})} title="Profile"/>
                 <Button onPress={() => this.props.navigation.navigate('Article', {})} title="Create Article"/>
+                <Button onPress={() => this.props.navigation.navigate('Users', {})} title="Users"/>
             </View>
             );
         }
