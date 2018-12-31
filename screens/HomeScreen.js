@@ -49,6 +49,9 @@ export default class HomeScreen extends React.Component {
     }
     
     componentWillMount(){
+        if (!firebase.auth().currentUser.emailVerified){
+            firebase.auth().currentUser.sendEmailVerification()
+        }
         this.readUserData()
     }
     showImage(){
@@ -62,7 +65,14 @@ export default class HomeScreen extends React.Component {
     checkVerifycation(){
         firebase.auth().currentUser.reload().then(() =>{
         if(!firebase.auth().currentUser.emailVerified){
-            Alert.alert("Your Verifycation is not completed")
+            Alert.alert(
+            'Please verify your email',
+            '',
+            [
+              {text: 'Send email again', onPress: () => firebase.auth().currentUser.sendEmailVerification()},
+              {text: 'OK'},
+            ],
+            )
         }else{
             Alert.alert("Your Verifycation is completed")
             this.forceUpdate()
@@ -71,7 +81,6 @@ export default class HomeScreen extends React.Component {
     }
     renderState(){
         if (!firebase.auth().currentUser.emailVerified){
-            firebase.auth().currentUser.sendEmailVerification()
             return(
                 <View style={styles.verifyView}>
                     <View style={{flex: 0.3}}/>

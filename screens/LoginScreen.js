@@ -57,11 +57,13 @@ export default class loginScreen extends React.Component {
   }
   onPressLogin(){
     this.setState({error: '', loading: true});
-    const{email, password} = this.state;
+    var str = this.state.email.trimRight()
+    const email = str.trimLeft()
+    this.setState({email})
+    const password = this.state.password;
     firebase.auth().signInWithEmailAndPassword(email, password)
     .then(() => {
       this.props.navigation.navigate('Home', {});
-      this.setState({error:'', loading: false});
     })
     .catch(function(error) {
       //this.setState({error: 'Authentication failed', loading: false});
@@ -69,7 +71,7 @@ export default class loginScreen extends React.Component {
       
     })
   }
-  //Send info th Firebase
+  //Send info to Firebase
   writeUserDataFacebook(){
     var profileMail = this.state.userInfo.email.toLowerCase()
     /*var user1 = firebase.auth().currentUser;

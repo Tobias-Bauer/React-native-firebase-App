@@ -24,11 +24,11 @@ export default class HomeScreen extends React.Component {
     static navigationOptions = {
         header: null,
     };
-    writeUserData(){
+    writeUserData(email){
         if(this.state.name == null){
             Alert.alert("Please enter a username")
         }else{
-        Usermail = this.state.email.toLowerCase();
+        Usermail = email.toLowerCase();
         firebase.firestore().collection('user').doc(Usermail).set({
             email: Usermail,
             name: this.state.name,
@@ -44,7 +44,10 @@ export default class HomeScreen extends React.Component {
         if(this.state.password != this.state.password1){
             Alert.alert("The passwords aren't the same! ;(");
         }else{
-            const{email, password} = this.state;
+            var str = this.state.email.trimRight()
+            const email = str.trimLeft()
+            this.setState({email})
+            const password = this.state.password;
             firebase.auth().createUserWithEmailAndPassword(email, password)
             .then(() => {
                 this.props.navigation.navigate('Home', {});
@@ -52,7 +55,7 @@ export default class HomeScreen extends React.Component {
             .catch(function(error) {
                 alert(`SignUp ${error}`);
             })
-            this.writeUserData();
+            this.writeUserData(email);
         }
       }
     render(){

@@ -21,7 +21,7 @@ import '@firebase/auth'
 export default class HomeScreen extends React.Component {
     constructor(props){
         super(props);
-        this.state = {data: [], name: null, loading: true};
+        this.state = {data: [], name: null, loading: true, currentUserEmail: null};
     }
 
     static navigationOptions = {
@@ -34,10 +34,12 @@ export default class HomeScreen extends React.Component {
     }
 
     async readUserData() {
+        this.setState({currentUserEmail: firebase.auth().currentUser.email})
         firebase.firestore().collection('user').get().then((users) => {
             users.docs.forEach(doc => {
+                if(doc.data().email != this.state.currentUserEmail){
                 this.addUserToArray(doc)
-                //renderUsers(doc)
+                }
                 //Only for testing reasons
                 //Alert.alert(doc.data().name)
             })
@@ -54,26 +56,19 @@ export default class HomeScreen extends React.Component {
         })
     }
 
-    follow(email){
-        Alert.alert("You followed: " + email)
-    }
-
     render(){
         return(
             <ScrollView>
                 <FlatList
                     data={this.state.data}
                     renderItem={({ item }) => (
-                        <View style={styles.UserView}>
+                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Follow', {email: item.email, name: item.name})} style={styles.UserView}>
                             <Image source={{uri: item.url}} style={styles.UserImage}/>
                             <View style={styles.Textbox}>
                                 <Text style={styles.Username}>{item.name}</Text>
                                 <Text style={styles.Usermail}>{item.email}</Text>
-                                <TouchableOpacity onPress={() => this.follow(item.email)}>
-                                    <Image source={require("../assets/follow.png")} style={styles.FollowIcon}/>
-                                </TouchableOpacity>
                             </View>
-                        </View>
+                        </TouchableOpacity>
                     )}
                     keyExtractor={(item, index) => index.toString()}
                 />
@@ -86,7 +81,8 @@ const styles = EStyleSheet.create({
     UserImage: {
         width: 100,
         height: 100,
-        borderRadius: 50
+        borderRadius: 50,
+        marginLeft: 5
     },
     Textbox: {
         flexDirection: 'column'
@@ -100,11 +96,6 @@ const styles = EStyleSheet.create({
     Usermail: {
         marginTop: 10,
         marginLeft: '5%',
-    },
-    FollowIcon: {
-        width: 30,
-        height: 30,
-        marginLeft: '75%'
     },
     UserView: {
         flexDirection: 'row',
