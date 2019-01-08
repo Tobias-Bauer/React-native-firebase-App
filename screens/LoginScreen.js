@@ -48,7 +48,7 @@ export default class loginScreen extends React.Component {
         //Tests if user is signed in
     firebase.auth().onAuthStateChanged((user) => {
       if (firebase.auth().currentUser != null) {
-        this.props.navigation.navigate('Home', {});
+        this.props.navigation.navigate('TabNavigator', {});
       }else{
         this.props.navigation.navigate('Login', {});
       }
@@ -63,7 +63,7 @@ export default class loginScreen extends React.Component {
     const password = this.state.password;
     firebase.auth().signInWithEmailAndPassword(email, password)
     .then(() => {
-      this.props.navigation.navigate('Home', {});
+      this.props.navigation.navigate('TabNavigator', {});
     })
     .catch(function(error) {
       //this.setState({error: 'Authentication failed', loading: false});
@@ -83,6 +83,7 @@ export default class loginScreen extends React.Component {
     })*/
     
     firebase.firestore().collection('user').doc(profileMail).set(this.state.userInfo)
+    firebase.firestore().collection('user').doc(profileMail).add({show: true})
     }
     //Login with facebook
   async loginWithFacebook() {
@@ -140,7 +141,6 @@ export default class loginScreen extends React.Component {
         <View style={styles.ButtonView} pointerEvents='box-none'>
           <TouchableOpacity
             style={styles.loginScreenButton}
-            //onPress={() => navigate('Home', {})}
             onPress={() => this.onPressLogin()}>
             <Image style={{width: 80, height: 80, }} source={require("../assets/LoginButton.png")}/>
           </TouchableOpacity>

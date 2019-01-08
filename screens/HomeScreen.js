@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
   TextInput,
   Switch,
-  Image
+  Image,
+  FlatList
 } from 'react-native';
 import Info from './SocialMediaScreen';
 import EStyleSheet from 'react-native-extended-stylesheet';
@@ -18,7 +19,7 @@ import '@firebase/auth'
 export default class HomeScreen extends React.Component {
     constructor(props){
         super(props);
-        this.state = {userInfo: null, pictureUrl: null};
+        this.state = {userInfo: null, pictureUrl: null, show: null, data: []};
     }
 
     static navigationOptions = {
@@ -37,30 +38,42 @@ export default class HomeScreen extends React.Component {
     
    async readUserData() {
         var profileMail
-        var user1 = firebase.auth().currentUser;
-        if (user1 != null) {
-        user1.providerData.forEach(function (profile) {
+        if (firebase.auth().currentUser != null) {
+          firebase.auth().currentUser.providerData.forEach(function (profile) {
           profileMail = profile.email;
         })
             const userInfo = await firebase.firestore().collection('user').doc(profileMail).get()
             const pictureUrl = userInfo.data().picture.data.url
+            const show = userInfo.data().show
             this.setState({pictureUrl})
+            this.setState({show})
       }
+      firebase.firestore().collection('user').get().then((users) => {
+        users.docs.forEach(doc => {
+            firebase.firestore().collection("user").doc(doc.data().email).collection("collection").get().then((posts) => {
+                posts.docs.forEach(post => {
+                    this.addPostToArray(post)
+                })
+            })
+        })
+      })
     }
     
+    async addPostToArray(post){
+        const userInfo = await firebase.firestore().collection('user').doc(post.data().User).get()
+        this.setState(state => {
+            const data = [...state.data, ...[{Title: post.data().Title, Text: post.data().Text, email: post.data().User, name: userInfo.data().name}]]
+            return{
+                data
+            }
+        })
+    }
+
     componentWillMount(){
         if (!firebase.auth().currentUser.emailVerified){
             firebase.auth().currentUser.sendEmailVerification()
         }
         this.readUserData()
-    }
-    showImage(){
-        if (this.state.pictureUrl != null){
-            return (
-                <Image source={{uri: this.state.pictureUrl}} style={styles.profilePicture} />
-            
-            )
-        }
     }
     checkVerifycation(){
         firebase.auth().currentUser.reload().then(() =>{
@@ -79,6 +92,16 @@ export default class HomeScreen extends React.Component {
         }
         })
     }
+
+    reload(){
+        firebase.auth().currentUser.reload().then(() =>{
+            this.setState({data: []})
+            this.readUserData().then(() =>{
+                this.forceUpdate()
+            })
+        })
+    }
+
     renderState(){
         if (!firebase.auth().currentUser.emailVerified){
             return(
@@ -95,12 +118,17 @@ export default class HomeScreen extends React.Component {
             //Home screen
             return(
             <View>
-                <Text>Second View: {this.state.pictureUrl}</Text>
-                {this.showImage()}
-                <Button onPress={() => this.signOut()} title="Sign Out"/>
-                <Button onPress={() => this.props.navigation.navigate('Profile', {})} title="Profile"/>
-                <Button onPress={() => this.props.navigation.navigate('Article', {})} title="Create Article"/>
-                <Button onPress={() => this.props.navigation.navigate('Users', {})} title="Users"/>
+                <Button onPress={() => this.reload()} title={"Reload"} />
+                <FlatList
+                    data={this.state.data}
+                    renderItem={({ item }) => (
+                            <View style={styles.box}>
+                                <Text style={styles.Username}>{item.Text}</Text>
+                                <Text style={styles.Usermail}>{item.name}</Text>
+                            </View>
+                    )}
+                    keyExtractor={(item, index) => index.toString()}
+                />
             </View>
             );
         }
@@ -116,6 +144,10 @@ export default class HomeScreen extends React.Component {
 }
 
 const styles = EStyleSheet.create({
+    box: {
+        borderBottomColor: 'grey',
+        borderBottomWidth: 0.5,
+    },
     profilePicture: {
         width: 100,
         height: 100,

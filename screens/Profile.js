@@ -18,7 +18,7 @@ import '@firebase/auth'
 export default class Profile extends React.Component {
     constructor(props){
         super(props);
-        this.state = {userInfo: null, pictureUrl: null, username: null, email: null, newEmail: null, newUsername: null, status: false};
+        this.state = {userInfo: null, pictureUrl: null, username: null, email: null, newEmail: null, newUsername: null, status: false, show: null};
     }
 
     static navigationOptions = {
@@ -36,12 +36,15 @@ export default class Profile extends React.Component {
             const username = userInfo.data().name
             const email = userInfo.data().email
             const password = userInfo.data().password
+            const show = userInfo.data().show
             this.setState({pictureUrl})
             this.setState({username})
             this.setState({password})
             this.setState({email})
             this.setState({newEmail: email})
             this.setState({newUsername: username})
+            this.setState({show})
+
       }
     }
     componentWillMount(){
@@ -88,6 +91,10 @@ export default class Profile extends React.Component {
     changeLanguage(){
         //Not ready yet
     }
+    updateShow(state){
+        firebase.firestore().collection('user').doc(this.state.email).update({show: state})
+        this.setState({show: state})
+    }
     render(){
         return(
             <View style={{width:'100%',height:'100%'}}>
@@ -112,6 +119,9 @@ export default class Profile extends React.Component {
                 <Button title={"Save"} onPress={() => this.save()}/>
                 //Change Password
                 {this.renderPasswordView()}
+                <Text>Show all posts</Text>
+                <Switch style={styles.switch} value={this.state.show} onValueChange={(state) => this.updateShow(state)}/>
+                <Button onPress={() => this.signOut()} title="Sign Out"/>
             </View>
         )
     }

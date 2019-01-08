@@ -32,6 +32,7 @@ export default class HomeScreen extends React.Component {
         firebase.firestore().collection('user').doc(Usermail).set({
             email: Usermail,
             name: this.state.name,
+            show: true,
             picture:{
                 data:{
                     url: "https://images.unsplash.com/photo-1523325343676-4136d25d013b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=900&q=60"

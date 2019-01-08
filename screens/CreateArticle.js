@@ -36,7 +36,8 @@ export default class HomeScreen extends React.Component {
             }
             firebase.firestore().collection("user").doc(profileMail).collection("collection").doc(this.state.title).set({
                 Title: this.state.title,
-                Text: this.state.text
+                Text: this.state.text,
+                User: firebase.auth().currentUser.email
             })
         }else{
             Alert.alert("Please insert your Text")
