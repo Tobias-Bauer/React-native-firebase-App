@@ -19,7 +19,7 @@ import '@firebase/auth'
 export default class HomeScreen extends React.Component {
     constructor(props){
         super(props);
-        this.state = {title: null, text: null, slider: true, value: 0};
+        this.state = {title: null, text: null, slider: true, value: 0, price: ""};
     }
 
     static navigationOptions = {
@@ -35,23 +35,52 @@ export default class HomeScreen extends React.Component {
             profileMail = profile.email;
             })
             }
+            if(this.state.slider){
+                var price = this.state.value
+            }else{
+                if(this.state.price != ""){
+                    var price = this.state.price
+                }else{
+                    var price = 0
+                }
+            }
             firebase.firestore().collection("user").doc(profileMail).collection("collection").doc(this.state.title).set({
                 Title: this.state.title,
                 Text: this.state.text,
-                User: firebase.auth().currentUser.email
+                User: firebase.auth().currentUser.email,
+                Price: price
             })
         }else{
             Alert.alert("Please insert your Text")
         }
     }
+    setText(text){
+        var isnum = /^\d+$/.test(text);
+        if(isnum){
+            var save = text
+        }else{
+            if(text != ""){
+                Alert.alert("Please use only even numbers")
+                var save = ""
+            }
+        }
+        this.setState({price: save})
+    }
     renderSlider(){
         if(this.state.slider){
             return(
-                <Slider value={this.state.value} onValueChange={(value) => this.setState({value})} />
+                <View style={styles.sliderView}>
+                    <Text style={{marginLeft: '2%'}}>{this.state.value}€</Text>
+                    <Slider style={styles.slider} value={this.state.value} maximumValue={1000} step={1} onValueChange={(value) => this.setState({value})} />
+                    <Button title={'->'} onPress={() => this.setState({slider: false})}/>
+                </View>
             )
         }else{
             return(
-                <TextInput/>
+                <View style={styles.sliderView}>
+                    <TextInput value={this.state.price} style={styles.priceInput} keyboardType='numeric' onChangeText={(text) => this.setText(text)}/>
+                    <Button title={'->'} onPress={() => this.setState({slider: true})}/>
+                </View>
             )
         }
     }
@@ -89,5 +118,17 @@ const styles = EStyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 18,
         elevation: 20,
-    }
+    },
+    sliderView: {
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    slider: {
+        width: '80%',
+        marginLeft: '5%'
+    },
+    priceInput: {
+        width: '10%',
+        height: 40
+    },
 });

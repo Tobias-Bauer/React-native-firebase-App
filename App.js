@@ -3,6 +3,7 @@ import LoginScreen from './screens/LoginScreen';
 import HomeScreen from './screens/HomeScreen';
 import SocialMediaScreen from './screens/SocialMediaScreen';
 import SignUpScreen from './screens/SignUpScreen';
+import SplashScreen from './screens/SplashScreen';
 import ProfileScreen from './screens/Profile';
 import ArticleScreen from './screens/CreateArticle';
 import UserScreen from './screens/UserScreen';
@@ -49,8 +50,9 @@ const Tabs = createBottomTabNavigator({
   order: ['Home', 'Add', 'Users', 'Profile']
 })
 
-export default createStackNavigator(
+const Stack = createStackNavigator(
   {
+  Splash: { screen: SplashScreen },
   Login: { screen: LoginScreen },
   SignUp: { screen: SignUpScreen },
   TabNavigator: { screen: Tabs },
@@ -63,7 +65,11 @@ export default createStackNavigator(
   */
 },
 {
-  initialRouteName: 'Login',
+  initialRouteName: 'Splash',
   headerMode: 'none',
+  navigationOptions: {
+    gesturesEnabled: false
+  }
 })
 
+export default Stack

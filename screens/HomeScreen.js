@@ -26,15 +26,7 @@ export default class HomeScreen extends React.Component {
         title: "Home Screen",
         headerLeft: null,
     };
-    signOut(){
-        firebase.auth().signOut()
-        .then(function() {
-          
-        })
-        .catch(function(error) {
-          // An error happened
-        });
-    }
+
     
    async readUserData() {
         var profileMail
@@ -123,7 +115,7 @@ export default class HomeScreen extends React.Component {
                     data={this.state.data}
                     renderItem={({ item }) => (
                             <TouchableOpacity style={styles.box} onPress={() => this.props.navigation.navigate('ShowArticle', {authorEmail: item.email, title: item.Title})}>
-                                <Text style={styles.Username}>{item.Text}</Text>
+                                <Text style={styles.Username}>{item.Title}</Text>
                                 <Text style={styles.Usermail}>{item.name}</Text>
                             </TouchableOpacity>
                     )}

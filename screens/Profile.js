@@ -95,6 +95,15 @@ export default class Profile extends React.Component {
         firebase.firestore().collection('user').doc(this.state.email).update({show: state})
         this.setState({show: state})
     }
+    signOut(){
+        firebase.auth().signOut()
+        .then(function() {
+          
+        })
+        .catch(function(error) {
+          // An error happened
+        });
+    }
     render(){
         return(
             <View style={{width:'100%',height:'100%'}}>

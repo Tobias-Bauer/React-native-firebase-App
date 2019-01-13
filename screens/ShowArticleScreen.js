@@ -17,7 +17,7 @@ import '@firebase/auth'
 export default class ShowArticleScreen extends React.Component {
     constructor(props){
         super(props);
-        this.state = {email: null, title: '', Text: ''};
+        this.state = {email: null, title: '', Text: '', price: null};
     }
 
     static navigationOptions = ({ navigation }) => {
@@ -30,7 +30,7 @@ export default class ShowArticleScreen extends React.Component {
         this.setState({email})
         const userInfo = await firebase.firestore().collection('user').doc(email).get()
         const article = await firebase.firestore().collection('user').doc(email).collection('collection').doc(this.props.navigation.getParam('title')).get()
-        this.setState({title: article.data().Title, Text: article.data().Text})
+        this.setState({title: article.data().Title, Text: article.data().Text, price: article.data().Price})
     }
 
     componentWillMount(){
@@ -43,6 +43,7 @@ export default class ShowArticleScreen extends React.Component {
             <View>
                 <Text>{this.state.title}</Text>
                 <Text>{this.state.Text}</Text>
+                <Text>{this.state.price}€</Text>
             </View>
         )
     }

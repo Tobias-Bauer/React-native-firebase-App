@@ -1,15 +1,11 @@
 import React from 'react';
 import {
-  StyleSheet,
   Text,
   View,
-  Button,
-  Alert,
   TouchableOpacity,
   TextInput,
   Switch,
   Image,
-  SafeAreaView,
   ActivityIndicator,
   ImageBackground,
   StatusBar
@@ -46,13 +42,13 @@ export default class loginScreen extends React.Component {
   componentWillMount(){
  
         //Tests if user is signed in
-    firebase.auth().onAuthStateChanged((user) => {
+    firebase.auth().onAuthStateChanged(() => {
       if (firebase.auth().currentUser != null) {
         this.props.navigation.navigate('TabNavigator', {});
       }else{
         this.props.navigation.navigate('Login', {});
       }
-    });
+    })
     
   }
   onPressLogin(){
