@@ -7,6 +7,7 @@ import ProfileScreen from './screens/Profile';
 import ArticleScreen from './screens/CreateArticle';
 import UserScreen from './screens/UserScreen';
 import FollowScreen from './screens/FollowScreen'
+import ShowArticleScreen from './screens/ShowArticleScreen'
 import firebase from './Firebase.js'
 
 const UsersStack = createStackNavigator({
@@ -19,6 +20,7 @@ const UsersStack = createStackNavigator({
 
 const HomeStack = createStackNavigator({
   Home: { screen: HomeScreen },
+  ShowArticle: { screen: ShowArticleScreen },
 },
 {
   initialRouteName: 'Home',

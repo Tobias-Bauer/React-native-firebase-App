@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
   TextInput,
   Switch,
-  Image
+  Image,
+  Slider
 } from 'react-native';
 import Info from './SocialMediaScreen';
 import EStyleSheet from 'react-native-extended-stylesheet';
@@ -18,7 +19,7 @@ import '@firebase/auth'
 export default class HomeScreen extends React.Component {
     constructor(props){
         super(props);
-        this.state = {title: null, text: null};
+        this.state = {title: null, text: null, slider: true, value: 0};
     }
 
     static navigationOptions = {
@@ -43,6 +44,17 @@ export default class HomeScreen extends React.Component {
             Alert.alert("Please insert your Text")
         }
     }
+    renderSlider(){
+        if(this.state.slider){
+            return(
+                <Slider value={this.state.value} onValueChange={(value) => this.setState({value})} />
+            )
+        }else{
+            return(
+                <TextInput/>
+            )
+        }
+    }
     render(){
         return(
             <View>
@@ -50,6 +62,7 @@ export default class HomeScreen extends React.Component {
                 <TextInput style={styles.SubtitleText} onChangeText={title => this.setState({title})}/>
                 <Text>Article</Text>
                 <TextInput scrollEnabled={true} multiline={true} style={styles.ArticleText} onChangeText={text => this.setState({text})}/>
+                {this.renderSlider()}
                 <Button title={'Submit'} onPress={() => this.submit()}/>
             </View>
         );

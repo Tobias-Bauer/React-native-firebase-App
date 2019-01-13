@@ -122,10 +122,10 @@ export default class HomeScreen extends React.Component {
                 <FlatList
                     data={this.state.data}
                     renderItem={({ item }) => (
-                            <View style={styles.box}>
+                            <TouchableOpacity style={styles.box} onPress={() => this.props.navigation.navigate('ShowArticle', {authorEmail: item.email, title: item.Title})}>
                                 <Text style={styles.Username}>{item.Text}</Text>
                                 <Text style={styles.Usermail}>{item.name}</Text>
-                            </View>
+                            </TouchableOpacity>
                     )}
                     keyExtractor={(item, index) => index.toString()}
                 />
