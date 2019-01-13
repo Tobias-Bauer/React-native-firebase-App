@@ -4,6 +4,7 @@ import HomeScreen from './screens/HomeScreen';
 import SocialMediaScreen from './screens/SocialMediaScreen';
 import SignUpScreen from './screens/SignUpScreen';
 import SplashScreen from './screens/SplashScreen';
+import VerifyScreen from './screens/VerifyScreen';
 import ProfileScreen from './screens/Profile';
 import ArticleScreen from './screens/CreateArticle';
 import UserScreen from './screens/UserScreen';
@@ -54,6 +55,7 @@ const Stack = createStackNavigator(
   {
   Splash: { screen: SplashScreen },
   Login: { screen: LoginScreen },
+  Verify: { screen: VerifyScreen },
   SignUp: { screen: SignUpScreen },
   TabNavigator: { screen: Tabs },
   /*

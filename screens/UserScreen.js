@@ -11,7 +11,7 @@ import {
   Image,
   ScrollView,
   FlatList,
-  ListItem
+  RefreshControl
 } from 'react-native';
 import Info from './SocialMediaScreen';
 import EStyleSheet from 'react-native-extended-stylesheet';
@@ -21,7 +21,7 @@ import '@firebase/auth'
 export default class HomeScreen extends React.Component {
     constructor(props){
         super(props);
-        this.state = {data: [], name: null, loading: true, currentUserEmail: null};
+        this.state = {data: [], name: null, loading: true, currentUserEmail: null, refreshing: false};
     }
 
     static navigationOptions = {
@@ -55,10 +55,26 @@ export default class HomeScreen extends React.Component {
             }
         })
     }
+    reload(){
+        firebase.auth().currentUser.reload().then(() =>{
+            this.setState({data: []})
+            this.readUserData().then(() =>{
+                this.forceUpdate()
+            })
+        })
+    }
+    _onRefresh = () => {
+        this.reload()
+      }
 
     render(){
         return(
-            <ScrollView>
+            <ScrollView
+            refreshControl={
+            <RefreshControl
+                refreshing={this.state.refreshing}
+                onRefresh={this._onRefresh}
+            />}>>
                 <FlatList
                     data={this.state.data}
                     renderItem={({ item }) => (

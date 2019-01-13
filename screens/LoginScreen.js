@@ -8,7 +8,8 @@ import {
   Image,
   ActivityIndicator,
   ImageBackground,
-  StatusBar
+  StatusBar,
+  Alert
 } from 'react-native';
 import EStyleSheet from 'react-native-extended-stylesheet';
 import { StackNavigator } from 'react-navigation';
@@ -40,13 +41,20 @@ export default class loginScreen extends React.Component {
     userInfo: null,
   }
   componentWillMount(){
- 
+    if(this.props.navigation.getParam('delete')){
+      var user = firebase.auth().currentUser
+        user.delete()
+    }
         //Tests if user is signed in
     firebase.auth().onAuthStateChanged(() => {
       if (firebase.auth().currentUser != null) {
-        this.props.navigation.navigate('TabNavigator', {});
+        if(firebase.auth().currentUser.emailVerified){
+          this.props.navigation.navigate('TabNavigator', {})
+        }else{
+          this.props.navigation.navigate('Verify', {});
+        }
       }else{
-        this.props.navigation.navigate('Login', {});
+        this.props.navigation.navigate('Login', {})
       }
     })
     

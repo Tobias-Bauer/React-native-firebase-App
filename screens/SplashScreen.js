@@ -19,11 +19,15 @@ export default class SplashScreen extends Component {
         super(props);
         firebase.auth().onAuthStateChanged(() => {
             if (firebase.auth().currentUser != null) {
-              this.props.navigation.navigate('TabNavigator', {});
+              if(firebase.auth().currentUser.emailVerified){
+                this.props.navigation.navigate('TabNavigator', {})
+              }else{
+                this.props.navigation.navigate('Verify', {});
+              }
             }else{
-              this.props.navigation.navigate('Login', {});
+              this.props.navigation.navigate('Login', {})
             }
-        })
+          })
     }
     render() {
         return (
