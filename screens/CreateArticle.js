@@ -23,36 +23,52 @@ import '@firebase/auth'
 export default class HomeScreen extends React.Component {
     constructor(props){
         super(props);
-        this.state = {imagePicked: false, cover: false, image: null, title: null, text: null, slider: true, value: 0, price: ""};
+        this.state = {cover: false, image: null, title: null, text: null, slider: true, value: 0, price: ""};
     }
 
     static navigationOptions = {
         title: "Create Article",
         headerLeft: null,
     };
-    submit(){
+    async submit(){
         if(this.state.title != null && this.state.text != null && this.state.title != "" && this.state.text != ""){
-            var profileMail
-            var user1 = firebase.auth().currentUser;
-            if (user1 != null) {
-            user1.providerData.forEach(function (profile) {
-            profileMail = profile.email;
-            })
-            }
-            if(this.state.slider){
-                var price = this.state.value
-            }else{
-                if(this.state.price != ""){
-                    var price = this.state.price
+            var getDoc = firebase.firestore().collection("user").doc(firebase.auth().currentUser.email).collection("collection").doc(this.state.title).get().then( async (doc) => {
+                if (doc.exists) {
+                    Alert.alert("You allready have a post with this name")
                 }else{
-                    var price = 0
+                    if(this.state.cover && this.state.image != null || !cover){
+                        if(this.state.slider){
+                            var price = this.state.value
+                        }else{
+                            if(this.state.price != ""){
+                                var price = this.state.price
+                            }else{
+                                var price = 0
+                            }
+                        }
+                        firebase.firestore().collection("user").doc(firebase.auth().currentUser.email).collection("collection").doc(this.state.title).set({
+                            Title: this.state.title,
+                            Text: this.state.text,
+                            User: firebase.auth().currentUser.email,
+                            Price: price,
+                            Cover: "null"
+                        })
+                        if(this.state.cover && this.state.image != null){
+                            var response = await fetch(this.state.image)
+                            const blob = await response.blob()
+                            var ref = firebase.storage().ref().child('user/'+firebase.auth().currentUser.email+'/article/'+ this.state.title +'/cover')
+                            ref.put(blob).then(async () =>{
+                                var url = await ref.getDownloadURL()
+                                this.setState({imageUrl: url})
+                                firebase.firestore().collection("user").doc(firebase.auth().currentUser.email).collection("collection").doc(this.state.title).update({
+                                    Cover: this.state.imageUrl
+                                })
+                            })
+                        }
+                    }else{
+                        Alert.alert("Please select your cover")
+                    }
                 }
-            }
-            firebase.firestore().collection("user").doc(profileMail).collection("collection").doc(this.state.title).set({
-                Title: this.state.title,
-                Text: this.state.text,
-                User: firebase.auth().currentUser.email,
-                Price: price
             })
         }else{
             Alert.alert("Please insert your Text")
@@ -76,16 +92,11 @@ export default class HomeScreen extends React.Component {
         if (status !== 'granted') {
             let result = await ImagePicker.launchImageLibraryAsync({
                 allowsEditing: true,
-                aspect: [4, 3],
             });
             
             if (!result.cancelled) {
-                this.setState({ image: result.uri, imagePicked: true })
-                
-                var response = await fetch(result.uri)
-                const blob = await response.blob()
-                var ref = firebase.storage().ref().child('user/'+firebase.auth().currentUser.email+'/article/'+ 'test-image')//Subtitle missing
-                ref.put(blob)
+                this.setState({ image: result.uri})
+
             }
         }
     }
@@ -118,9 +129,11 @@ export default class HomeScreen extends React.Component {
                     {this.renderSlider()}
                     {!this.state.cover && <Button title={'Add Cover'} onPress={() => this.setState({cover: true})}/>}
                     <View style={styles.deleteImageContainer}>
-                        {this.state.cover && <Image source={require('../assets/Delete.png')} style={styles.deleteImage}/>}
+                        <TouchableOpacity onPress={() => this.setState({cover: false, image: null})}>
+                            {this.state.cover && <Image source={require('../assets/Delete.png')} style={styles.deleteImage}/>}
+                        </TouchableOpacity>
                     </View>
-                    {!this.state.imagePicked && this.state.cover && <ImageBackground source={require('../assets/ImagePlaceholder.png')} style={{width: '100%', height: 210}} resizeMode="contain">
+                    {!this.state.image && this.state.cover && <ImageBackground source={require('../assets/ImagePlaceholder.png')} style={{width: '100%', height: 210}} resizeMode="contain">
                         <Button title={"Choose Photo"} onPress={() => this._pickImage()}/>
                         <Button title={"Take Photo"} onPress={() => this._takePhoto()}/>
                     </ImageBackground>}
