@@ -103,6 +103,11 @@ export default class HomeScreen extends React.Component {
 }
 
 const styles = EStyleSheet.create({
+    Username: {
+        marginLeft: '5%',
+        fontSize: '1.5rem',
+        fontWeight: 'bold'
+    },
     box: {
         borderBottomColor: 'grey',
         borderBottomWidth: 0.5,
